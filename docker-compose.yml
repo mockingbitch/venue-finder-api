@@ -1,0 +1,52 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    networks:
+      - venuefinder_network
+    environment:
+      MYSQL_DATABASE: venuefinder
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: venuefinder
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - venuefinder_network
+    environment:
+      APP_NAME: VenueFinder
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      FRONTEND_URL: http://localhost:3000
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: venuefinder
+      DB_USERNAME: venuefinder
+      DB_PASSWORD: secret
+    ports:
+      - "8000:8000"
+
+networks:
+  venuefinder_network:
+    external: true
+
+volumes:
+  mysql_data:
