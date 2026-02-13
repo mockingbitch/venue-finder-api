@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -9,24 +10,22 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
  * User model for authentication and authorization.
- * Implements JWTSubject for tymon/jwt-auth. Roles: admin, user.
+ * Implements JWTSubject for tymon/jwt-auth. Role-based access via App\Enums\Role.
  */
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
-    /** @var string Admin role (full CRUD venues). */
-    public const ROLE_ADMIN = 'admin';
-
-    /** @var string Default user role (view venues only). */
-    public const ROLE_USER = 'user';
-
-    /** @var array<int, string> */
+    /**
+     * The attributes that are mass assignable.
+     * Role is intentionally excluded to prevent mass assignment; set explicitly in code only.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
     ];
 
     /**
@@ -39,6 +38,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => Role::class,
         ];
     }
 
@@ -60,7 +60,7 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [
-            'role' => $this->role,
+            'role' => $this->role?->value,
         ];
     }
 
@@ -71,7 +71,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->role?->isAdmin() ?? false;
     }
 
     /**
@@ -81,6 +81,6 @@ class User extends Authenticatable implements JWTSubject
      */
     public function isUser(): bool
     {
-        return $this->role === self::ROLE_USER;
+        return $this->role === Role::USER;
     }
 }

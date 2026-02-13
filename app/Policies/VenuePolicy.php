@@ -7,7 +7,7 @@ use App\Models\Venue;
 
 /**
  * Authorization policy for Venue model.
- * View/list: anyone. Create/update/delete: admin only.
+ * View/list: anyone. Create/update/delete: ADMIN role only (used with role:admin middleware).
  */
 class VenuePolicy
 {

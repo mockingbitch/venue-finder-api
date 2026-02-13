@@ -47,6 +47,20 @@ it('can register a new user', function () {
     $this->assertDatabaseHas('users', ['email' => 'new@example.com']);
 });
 
+it('registration cannot set role via request (mass assignment protection)', function () {
+    $response = $this->postJson('/api/register', [
+        'name' => 'Hacker',
+        'email' => 'hacker@example.com',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
+        'role' => 'admin',
+    ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('user.role', 'user');
+    $this->assertDatabaseHas('users', ['email' => 'hacker@example.com', 'role' => 'user']);
+});
+
 it('can logout with JWT', function () {
     $user = User::factory()->create();
     $token = auth('api')->login($user);
@@ -55,4 +69,17 @@ it('can logout with JWT', function () {
         ->postJson('/api/logout');
 
     $response->assertOk();
+});
+
+it('can refresh token', function () {
+    $user = User::factory()->create();
+    $token = auth('api')->login($user);
+
+    $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        ->postJson('/api/refresh');
+
+    $response->assertOk()
+        ->assertJsonStructure(['token', 'token_type', 'expires_in', 'user']);
+    $newToken = $response->json('token');
+    $this->assertNotSame($token, $newToken);
 });

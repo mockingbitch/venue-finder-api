@@ -27,7 +27,7 @@ function jwtToken(User $user): string
 }
 
 describe('POST /api/admin/venues', function () {
-    it('allows admin to create venue', function () {
+    it('admin can create venue', function () {
         $payload = [
             'name' => 'New Venue',
             'description' => 'A great place',
@@ -49,7 +49,7 @@ describe('POST /api/admin/venues', function () {
         $this->assertDatabaseHas('venues', ['name' => 'New Venue']);
     });
 
-    it('denies user role from creating venue', function () {
+    it('user cannot create venue', function () {
         $response = $this->withHeader('Authorization', 'Bearer '.jwtToken($this->user))
             ->postJson('/api/admin/venues', [
                 'name' => 'New Venue',
@@ -60,12 +60,26 @@ describe('POST /api/admin/venues', function () {
         $response->assertForbidden();
     });
 
-    it('requires authentication', function () {
+    it('guest cannot access admin routes', function () {
         $response = $this->postJson('/api/admin/venues', [
             'name' => 'New Venue',
             'price' => 1000,
             'capacity' => 100,
         ]);
+
+        $response->assertUnauthorized();
+    });
+
+    it('guest cannot access admin update route', function () {
+        $venue = Venue::factory()->create();
+        $response = $this->putJson('/api/admin/venues/'.$venue->id, ['name' => 'Hacked']);
+
+        $response->assertUnauthorized();
+    });
+
+    it('guest cannot access admin delete route', function () {
+        $venue = Venue::factory()->create();
+        $response = $this->deleteJson('/api/admin/venues/'.$venue->id);
 
         $response->assertUnauthorized();
     });

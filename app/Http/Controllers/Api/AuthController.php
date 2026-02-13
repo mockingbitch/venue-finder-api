@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -64,12 +65,29 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user',
         ]);
+        $user->role = Role::USER;
+        $user->save();
 
         $token = auth('api')->login($user);
 
         return $this->respondWithToken($token, $user, 201);
+    }
+
+    /**
+     * Refresh the current JWT and return a new token (old token is blacklisted).
+     *
+     * POST /api/refresh
+     *
+     * @param  Request  $request  Requires Bearer token
+     * @return JsonResponse  { token, token_type, expires_in, user }
+     */
+    public function refresh(Request $request): JsonResponse
+    {
+        $token = auth('api')->refresh();
+        $user = auth('api')->user();
+
+        return $this->respondWithToken($token, $user);
     }
 
     /**
@@ -104,7 +122,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role,
+                'role' => $user->role?->value,
             ],
         ]);
     }
@@ -127,7 +145,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role,
+                'role' => $user->role?->value,
             ],
         ], $status);
     }

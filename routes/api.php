@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth:api')->group(function () {
+    Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 });
@@ -22,8 +23,8 @@ Route::middleware('auth:api')->group(function () {
 Route::get('/venues', [VenueController::class, 'index']);
 Route::get('/venues/{id}', [VenueController::class, 'show']);
 
-// Admin: CRUD venues (JWT + admin role enforced in policy & FormRequest)
-Route::middleware('auth:api')->prefix('admin')->group(function () {
+// Admin: only ADMIN role can access /api/admin/* (middleware + policy)
+Route::middleware(['auth:api', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/venues', [AdminVenueController::class, 'store']);
     Route::put('/venues/{id}', [AdminVenueController::class, 'update']);
     Route::delete('/venues/{id}', [AdminVenueController::class, 'destroy']);
