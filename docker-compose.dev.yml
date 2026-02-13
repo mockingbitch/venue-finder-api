@@ -1,0 +1,11 @@
+# Development override: run composer install with dev deps and keep storage writable
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/var/www/html
+    command: php-fpm
