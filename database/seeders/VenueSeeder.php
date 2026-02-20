@@ -4,9 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Venue;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Seeds 20 fake venues using VenueFactory.
+ * Seeds ~50 fake venues using VenueFactory.
  */
 class VenueSeeder extends Seeder
 {
@@ -17,6 +18,7 @@ class VenueSeeder extends Seeder
      */
     public function run(): void
     {
-        Venue::factory()->count(20)->create();
+        DB::table('venues')->truncate();
+        Venue::factory()->count(50)->create();
     }
 }

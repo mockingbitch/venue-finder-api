@@ -17,13 +17,14 @@ class VenueFactory extends Factory
      */
     public function definition(): array
     {
-        $lat = fake()->latitude();
-        $lng = fake()->longitude();
+        // Hanoi bounding box (approx): lat 20.8-21.2, lng 105.6-106.0
+        $lat = fake()->randomFloat(6, 20.8, 21.2);
+        $lng = fake()->randomFloat(6, 105.6, 106.0);
 
         return [
             'name' => fake()->company().' Hall',
             'description' => fake()->paragraphs(2, true),
-            'address' => fake()->streetAddress().', '.fake()->city(),
+            'address' => fake()->streetAddress().', Hà Nội',
             'lat' => $lat,
             'lng' => $lng,
             'price' => fake()->randomFloat(2, 500, 50000),

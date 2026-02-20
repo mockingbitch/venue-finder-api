@@ -40,8 +40,8 @@ cp .env.example .env
 docker compose up -d --build
 
 # Install deps and key (if app runs on host instead of in container)
-composer install
-php artisan key:generate
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
 
 # JWT secret (required for auth)
 docker compose exec app php artisan jwt:secret
@@ -51,7 +51,7 @@ docker compose exec app php artisan migrate --force
 docker compose exec app php artisan db:seed
 ```
 
-API base: **http://localhost:8080**
+API base: **http://localhost:8089**
 
 ## Local development (no Docker)
 
