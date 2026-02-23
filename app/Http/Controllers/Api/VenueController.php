@@ -31,8 +31,17 @@ class VenueController extends Controller
     {
         $filters = $request->only([
             'min_lat', 'max_lat', 'min_lng', 'max_lng',
-            'search', 'min_capacity', 'max_price', 'per_page',
+            'search', 'min_capacity', 'max_price', 'per_page', 'paginate',
         ]);
+
+        // For map: return all venues when per_page=0 or paginate=0
+        if ($request->has('per_page') && in_array($request->query('per_page'), ['0', 'all'], true)) {
+            $filters['paginate'] = false;
+            $filters['per_page'] = 0;
+        } elseif ($request->has('paginate') && in_array($request->query('paginate'), ['0', 'false'], true)) {
+            $filters['paginate'] = false;
+            $filters['per_page'] = 0;
+        }
 
         $minLat = $request->filled('min_lat') ? (float) $request->min_lat : null;
         $maxLat = $request->filled('max_lat') ? (float) $request->max_lat : null;

@@ -26,10 +26,10 @@ class VenueRepository implements VenueRepositoryInterface
         $paginate = $filters['paginate'] ?? true;
 
         if ($paginate && $perPage > 0) {
-            return $query->orderBy('name')->paginate($perPage);
+            return $query->orderByDesc('created_at')->paginate($perPage);
         }
 
-        return $query->orderBy('name')->get();
+        return $query->orderByDesc('created_at')->get();
     }
 
     /**
